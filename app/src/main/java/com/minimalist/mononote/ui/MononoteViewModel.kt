@@ -59,6 +59,12 @@ class MononoteViewModel(
         }
     }
 
+    fun appendVoiceNote(voiceText: String) {
+        viewModelScope.launch {
+            repository.appendToActiveNote(voiceText)
+        }
+    }
+
     fun toggleLiveStatus() {
         viewModelScope.launch {
             val current = repository.getActiveNoteDirect()

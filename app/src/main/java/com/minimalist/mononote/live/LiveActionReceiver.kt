@@ -39,6 +39,22 @@ class LiveActionReceiver : BroadcastReceiver() {
                     liveManager.dismissLiveCard()
                 }
             }
+            "com.minimalist.mononote.ACTION_APPEND_NOTE" -> {
+                val text = intent.getStringExtra("content") ?: intent.getStringExtra("text") ?: ""
+                if (text.isNotBlank()) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        repository.appendToActiveNote(text)
+                    }
+                    Toast.makeText(context, "Added to Mononote • $text", Toast.LENGTH_SHORT).show()
+                }
+            }
+            "com.minimalist.mononote.ACTION_SET_NOTE" -> {
+                val text = intent.getStringExtra("content") ?: intent.getStringExtra("text") ?: ""
+                CoroutineScope(Dispatchers.IO).launch {
+                    repository.saveActiveNoteContent(text)
+                }
+                Toast.makeText(context, "Mononote updated", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

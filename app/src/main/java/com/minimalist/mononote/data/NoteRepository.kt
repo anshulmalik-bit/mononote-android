@@ -31,6 +31,19 @@ class NoteRepository(private val noteDao: NoteDao) {
         }
     }
 
+    suspend fun appendToActiveNote(textToAppend: String) {
+        val current = getActiveNoteDirect()
+        val trimmed = textToAppend.trim()
+        if (trimmed.isNotBlank()) {
+            val updated = if (current.content.isBlank()) {
+                trimmed
+            } else {
+                "${current.content}\n• $trimmed"
+            }
+            saveActiveNoteContent(updated)
+        }
+    }
+
     suspend fun setLiveStatus(isLive: Boolean) {
         noteDao.setLiveStatus(isLive)
     }

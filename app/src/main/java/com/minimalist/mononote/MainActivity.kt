@@ -71,12 +71,20 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIncomingIntent(intent: Intent?) {
-        if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
-            if (!sharedText.isNullOrBlank()) {
-                val current = viewModel.activeNote.value.content
-                val updated = if (current.isBlank()) sharedText else "$current\n\n$sharedText"
-                viewModel.onContentChange(updated)
+        if (intent == null) return
+
+        val isShare = intent.action == Intent.ACTION_SEND && intent.type == "text/plain"
+        val isVoiceNote = intent.action == "com.google.android.gms.actions.CREATE_NOTE" ||
+                intent.action == "android.intent.action.CREATE_NOTE"
+
+        if (isShare || isVoiceNote) {
+            val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                ?: intent.getStringExtra(Intent.EXTRA_TITLE)
+                ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)
+                ?: intent.getStringExtra("android.intent.extra.TEXT")
+
+            if (!text.isNullOrBlank()) {
+                viewModel.appendVoiceNote(text)
             }
         }
     }

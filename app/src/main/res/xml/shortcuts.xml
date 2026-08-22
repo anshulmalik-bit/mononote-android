@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <capability android:name="actions.intent.CREATE_NOTE">
+        <intent
+            android:action="android.intent.action.CREATE_NOTE"
+            android:targetPackage="com.minimalist.mononote"
+            android:targetClass="com.minimalist.mononote.MainActivity">
+            <parameter
+                android:name="note.text"
+                android:key="android.intent.extra.TEXT" />
+        </intent>
+    </capability>
+</shortcuts>
