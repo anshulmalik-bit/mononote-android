@@ -32,7 +32,7 @@ class LiveCardManager(
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 context.getString(R.string.live_channel_name),
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = context.getString(R.string.live_channel_desc)
                 setShowBadge(false)
@@ -64,30 +64,7 @@ class LiveCardManager(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Complete Action Intent
-        val completeIntent = Intent(context, LiveActionReceiver::class.java).apply {
-            action = ACTION_COMPLETE_NOTE
-        }
-        val completePendingIntent = PendingIntent.getBroadcast(
-            context,
-            1,
-            completeIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // Copy Action Intent
-        val copyIntent = Intent(context, LiveActionReceiver::class.java).apply {
-            action = ACTION_COPY_NOTE
-            putExtra("content", note.content)
-        }
-        val copyPendingIntent = PendingIntent.getBroadcast(
-            context,
-            2,
-            copyIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // Stop Live Action Intent
+        // Dismiss Live Action Intent
         val stopIntent = Intent(context, LiveActionReceiver::class.java).apply {
             action = ACTION_STOP_LIVE
         }
@@ -100,17 +77,18 @@ class LiveCardManager(
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_mononote)
-            .setContentTitle("🔴 Mononote • Active Focus")
             .setContentText(contentText)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(contentText)
+            )
             .setOngoing(true)
             .setAutoCancel(false)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSilent(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openPendingIntent)
-            .addAction(R.drawable.ic_mononote, context.getString(R.string.action_done), completePendingIntent)
-            .addAction(R.drawable.ic_mononote, context.getString(R.string.action_copy), copyPendingIntent)
-            .addAction(R.drawable.ic_mononote, context.getString(R.string.action_stop_live), stopPendingIntent)
+            .addAction(0, "Dismiss", stopPendingIntent)
             .build()
 
         try {

@@ -6,7 +6,7 @@
     android:targetCellWidth="4"
     android:targetCellHeight="4"
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen|keyguard"
+    android:widgetCategory="home_screen"
     android:initialLayout="@layout/widget_note_4x4"
-    android:previewImage="@drawable/ic_mononote"
-    android:updatePeriodMillis="0" />
+    android:previewLayout="@layout/widget_note_4x4"
+    android:updatePeriodMillis="1800000" />
