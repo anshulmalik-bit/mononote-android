@@ -1,0 +1,28 @@
+R_DEF: Internal format may change without notice
+local
+color accent_blue
+color accent_green
+color amoled_black
+color live_red
+color surface_dark
+color surface_variant_dark
+color text_primary_dark
+color text_secondary_dark
+drawable ic_live
+drawable ic_mononote
+string action_copy
+string action_done
+string action_open
+string action_stop_live
+string app_name
+string empty_archive
+string live_channel_desc
+string live_channel_name
+string note_placeholder
+string tile_name
+string widget_name
+style Theme.Mononote
+xml backup_rules
+xml data_extraction_rules
+xml glance_widget_info
+xml shortcuts

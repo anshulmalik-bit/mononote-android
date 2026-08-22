@@ -1,5 +1,10 @@
 package com.minimalist.mononote.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,11 +24,14 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.minimalist.mononote.ui.theme.AppleBlue
 import com.minimalist.mononote.ui.theme.AppleRed
 import com.minimalist.mononote.ui.theme.DarkBorder
 import com.minimalist.mononote.ui.theme.DarkSurfaceCard
@@ -45,8 +54,10 @@ import com.minimalist.mononote.ui.theme.LightTextSecondary
 fun ActionToolbar(
     isLive: Boolean,
     isDark: Boolean,
+    isListening: Boolean,
     fontStyle: String,
     onToggleLive: () -> Unit,
+    onToggleVoice: () -> Unit,
     onToggleTheme: () -> Unit,
     onCycleFont: () -> Unit,
     onCopy: () -> Unit,
@@ -60,7 +71,7 @@ fun ActionToolbar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -75,6 +86,19 @@ fun ActionToolbar(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // 🎙️ VOICE DICTATION (MIC BUTTON)
+            IconButton(
+                onClick = onToggleVoice,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = if (isListening) Icons.Default.MicOff else Icons.Default.Mic,
+                    contentDescription = "Voice Dictation",
+                    tint = if (isListening) AppleRed else iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
             // Typography Switcher (SANS / SERIF / MONO)
             FontBadge(
                 fontStyle = fontStyle,
@@ -82,70 +106,70 @@ fun ActionToolbar(
                 onClick = onCycleFont
             )
 
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(2.dp))
 
             // ☀️ / 🌙 Theme Toggle
             IconButton(
                 onClick = onToggleTheme,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(34.dp)
             ) {
                 Icon(
                     imageVector = if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
                     contentDescription = "Toggle Theme",
                     tint = iconTint,
-                    modifier = Modifier.size(19.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
             // Copy
             IconButton(
                 onClick = onCopy,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(34.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.ContentCopy,
                     contentDescription = "Copy",
                     tint = iconTint,
-                    modifier = Modifier.size(19.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
             // Share
             IconButton(
                 onClick = onShare,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(34.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = "Share",
                     tint = iconTint,
-                    modifier = Modifier.size(19.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
             // Archive & Clear Canvas (New Note)
             IconButton(
                 onClick = onArchive,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(34.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Archive,
                     contentDescription = "Archive and Clear",
                     tint = iconTint,
-                    modifier = Modifier.size(19.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
             // Archive History Timeline
             IconButton(
                 onClick = onOpenArchiveHistory,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(34.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.History,
                     contentDescription = "Archive History",
                     tint = iconTint,
-                    modifier = Modifier.size(19.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -183,7 +207,7 @@ fun GoLiveButton(
             .background(bg)
             .border(1.dp, border, RoundedCornerShape(18.dp))
             .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 7.dp),
+            .padding(horizontal = 13.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -193,7 +217,7 @@ fun GoLiveButton(
                     .clip(CircleShape)
                     .background(if (isLive) AppleRed else if (isDark) DarkTextSecondary else LightTextSecondary)
             )
-            Spacer(modifier = Modifier.width(7.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = if (isLive) "LIVE" else "Go Live",
                 color = textColor,
@@ -227,13 +251,13 @@ fun FontBadge(
             .background(bg)
             .border(1.dp, border, RoundedCornerShape(14.dp))
             .clickable { onClick() }
-            .padding(horizontal = 9.dp, vertical = 5.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             color = textColor,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.5.sp
         )
