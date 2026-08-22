@@ -9,14 +9,9 @@ import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +19,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -35,21 +29,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material.icons.filled.IosShare
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.MicNone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -75,6 +61,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -126,7 +114,7 @@ fun MononoteScreen(
     val pillBorder = if (isDark) IosDarkPillBorder else IosLightPillBorder
     val cursorColor = if (isDark) IosDarkTextPrimary else AppleBlue
 
-    // Voice Dictation Manager
+    // Voice Dictation Manager (available via menu as additional shortcut)
     val voiceInputState = rememberVoiceInput(
         onResult = { spokenText ->
             val updated = if (localContent.isBlank()) {
@@ -160,7 +148,7 @@ fun MononoteScreen(
         }
     }
 
-    // Auto-focus keyboard on launch
+    // Auto-focus keyboard on launch so keyboard & dictation mic appear immediately
     LaunchedEffect(Unit) {
         try {
             focusRequester.requestFocus()
@@ -241,6 +229,34 @@ fun MononoteScreen(
                         onDismissRequest = { showMenu = false },
                         modifier = Modifier.background(cardBg)
                     ) {
+                        // 🎙️ Voice Dictation shortcut
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (voiceInputState.isListening) "🔴 Stop Dictation" else "🎙️ Voice Dictation",
+                                    color = textPrimary,
+                                    fontSize = 14.sp
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                if (voiceInputState.isListening) {
+                                    voiceInputState.stopListening()
+                                } else {
+                                    val hasMicPerm = ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.RECORD_AUDIO
+                                    ) == PackageManager.PERMISSION_GRANTED
+
+                                    if (hasMicPerm) {
+                                        voiceInputState.startListening()
+                                    } else {
+                                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                    }
+                                }
+                            }
+                        )
+
                         // 🔤 Font Style
                         DropdownMenuItem(
                             text = {
@@ -291,7 +307,7 @@ fun MononoteScreen(
             }
 
             // ─────────────────────────────────────────────────────────────
-            // 2. CENTER HERO FLOATING STICKY CARD
+            // 2. CENTER HERO FLOATING STICKY CARD (Exact Screenshot Match)
             // ─────────────────────────────────────────────────────────────
             Box(
                 modifier = Modifier
@@ -333,6 +349,11 @@ fun MononoteScreen(
                             localContent = newText
                             viewModel.onContentChange(newText)
                         },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            autoCorrectEnabled = true,
+                            keyboardType = KeyboardType.Text
+                        ),
                         textStyle = TextStyle(
                             fontFamily = when (activeNote.fontStyle) {
                                 "sans" -> FontFamily.Default
@@ -353,16 +374,16 @@ fun MononoteScreen(
             }
 
             // ─────────────────────────────────────────────────────────────
-            // 3. BOTTOM BAR (Archive Box • 🎙️ Mic • ⭕ Go Live • 🗑️ Delete)
+            // 3. BOTTOM BAR (Archive Box • ⭕ Go Live • 🗑️ Delete) — Exact 3 Items
             // ─────────────────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                    .padding(horizontal = 28.dp, vertical = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 1. Left: Archive Box Icon
+                // 1. Left: Archive Box Icon (Opens Archive Sheet)
                 IconButton(
                     onClick = { viewModel.setArchiveSheetVisible(true) },
                     modifier = Modifier.size(40.dp)
@@ -371,48 +392,11 @@ fun MononoteScreen(
                         imageVector = Icons.Outlined.Inventory2,
                         contentDescription = "Archive Timeline",
                         tint = iconColor,
-                        modifier = Modifier.size(21.dp)
-                    )
-                }
-
-                // 2. 🎙️ 1-TAP ON-SCREEN VOICE MIC BUTTON
-                val micBg = if (voiceInputState.isListening) Color(0xFFFFECEB) else pillBg
-                val micBorder = if (voiceInputState.isListening) AppleRed else pillBorder
-                val micTint = if (voiceInputState.isListening) AppleRed else iconColor
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(micBg)
-                        .border(1.dp, micBorder, CircleShape)
-                        .clickable {
-                            if (voiceInputState.isListening) {
-                                voiceInputState.stopListening()
-                            } else {
-                                val hasMicPerm = ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.RECORD_AUDIO
-                                ) == PackageManager.PERMISSION_GRANTED
-
-                                if (hasMicPerm) {
-                                    voiceInputState.startListening()
-                                } else {
-                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                }
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (voiceInputState.isListening) Icons.Default.MicOff else Icons.Outlined.Mic,
-                        contentDescription = "Voice Dictation",
-                        tint = micTint,
                         modifier = Modifier.size(20.dp)
                     )
                 }
 
-                // 3. Center: ⭕ Go Live Pill
+                // 2. Center: ⭕ Go Live Pill
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(22.dp))
@@ -454,7 +438,7 @@ fun MononoteScreen(
                     }
                 }
 
-                // 4. Right: Trash / Delete Icon (Archives & Clears Canvas)
+                // 3. Right: Trash / Delete Icon (Archives & Clears Canvas)
                 IconButton(
                     onClick = {
                         if (localContent.isNotBlank()) {
@@ -468,7 +452,7 @@ fun MononoteScreen(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = "Delete / Clear",
                         tint = iconColor,
-                        modifier = Modifier.size(21.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
