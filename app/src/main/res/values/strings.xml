@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Mononote</string>
+    <string name="tile_name">Mononote</string>
+    <string name="widget_name">Mononote Active Note</string>
+    <string name="live_channel_name">Mononote Live Card</string>
+    <string name="live_channel_desc">Shows your single active note continuously on the Lock Screen and Status Bar.</string>
+    <string name="action_done">Done</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_open">Open</string>
+    <string name="action_stop_live">Dismiss</string>
+    <string name="note_placeholder">Capture thought, task, or focus...</string>
+    <string name="empty_archive">No archived notes yet. Completed notes appear here.</string>
+</resources>

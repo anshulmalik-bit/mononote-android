@@ -1,0 +1,10 @@
+<resources>
+    <color name="amoled_black">#000000</color>
+    <color name="surface_dark">#121212</color>
+    <color name="surface_variant_dark">#1E1E1E</color>
+    <color name="text_primary_dark">#EEEEEE</color>
+    <color name="text_secondary_dark">#888888</color>
+    <color name="live_red">#FF453A</color>
+    <color name="accent_blue">#0A84FF</color>
+    <color name="accent_green">#30D158</color>
+</resources>
