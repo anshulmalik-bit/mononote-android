@@ -165,6 +165,7 @@ int drawable notification_template_icon_bg 0x7f060030
 int drawable notification_template_icon_low_bg 0x7f060031
 int drawable notification_tile_bg 0x7f060032
 int drawable notify_panel_notification_icon_bg 0x7f060033
+int drawable widget_card_bg 0x7f060034
 int id accessibility_action_clickable_span 0x7f070000
 int id accessibility_custom_action_0 0x7f070001
 int id accessibility_custom_action_1 0x7f070002
@@ -363,7 +364,12 @@ int id view_tree_lifecycle_owner 0x7f0700c2
 int id view_tree_on_back_pressed_dispatcher_owner 0x7f0700c3
 int id view_tree_saved_state_registry_owner 0x7f0700c4
 int id view_tree_view_model_store_owner 0x7f0700c5
-int id wrapped_composition_tag 0x7f0700c6
+int id widget_content 0x7f0700c6
+int id widget_live_badge 0x7f0700c7
+int id widget_root 0x7f0700c8
+int id widget_time 0x7f0700c9
+int id widget_title 0x7f0700ca
+int id wrapped_composition_tag 0x7f0700cb
 int integer m3c_window_layout_in_display_cutout_mode 0x7f080000
 int integer status_bar_notification_info_maxnum 0x7f080001
 int interpolator glance_btn_checkbox_checked_mtrl_animation_interpolator_0 0x7f090000
@@ -1542,6 +1548,8 @@ int layout size_match_match 0x7f0a048e
 int layout size_match_wrap 0x7f0a048f
 int layout size_wrap_match 0x7f0a0490
 int layout size_wrap_wrap 0x7f0a0491
+int layout widget_note_2x2 0x7f0a0492
+int layout widget_note_4x4 0x7f0a0493
 int raw glance_appwidget_keep 0x7f0b0000
 int string action_copy 0x7f0c0000
 int string action_done 0x7f0c0001
@@ -1642,7 +1650,9 @@ int string template_percent 0x7f0c005f
 int string tile_name 0x7f0c0060
 int string tooltip_description 0x7f0c0061
 int string tooltip_label 0x7f0c0062
-int string widget_name 0x7f0c0063
+int string widget_2x2_desc 0x7f0c0063
+int string widget_4x4_desc 0x7f0c0064
+int string widget_name 0x7f0c0065
 int style Base_Glance_AppWidget_Background 0x7f0d0000
 int style DialogWindowTheme 0x7f0d0001
 int style EdgeToEdgeFloatingDialogTheme 0x7f0d0002
@@ -1740,3 +1750,5 @@ int xml backup_rules 0x7f0f0000
 int xml data_extraction_rules 0x7f0f0001
 int xml glance_widget_info 0x7f0f0002
 int xml shortcuts 0x7f0f0003
+int xml widget_info_2x2 0x7f0f0004
+int xml widget_info_4x4 0x7f0f0005

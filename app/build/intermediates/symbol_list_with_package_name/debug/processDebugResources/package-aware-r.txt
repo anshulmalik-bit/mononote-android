@@ -166,6 +166,7 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable widget_card_bg
 id accessibility_action_clickable_span
 id accessibility_custom_action_0
 id accessibility_custom_action_1
@@ -364,6 +365,11 @@ id view_tree_lifecycle_owner
 id view_tree_on_back_pressed_dispatcher_owner
 id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
+id widget_content
+id widget_live_badge
+id widget_root
+id widget_time
+id widget_title
 id wrapped_composition_tag
 integer m3c_window_layout_in_display_cutout_mode
 integer status_bar_notification_info_maxnum
@@ -1543,6 +1549,8 @@ layout size_match_match
 layout size_match_wrap
 layout size_wrap_match
 layout size_wrap_wrap
+layout widget_note_2x2
+layout widget_note_4x4
 raw glance_appwidget_keep
 string action_copy
 string action_done
@@ -1643,6 +1651,8 @@ string template_percent
 string tile_name
 string tooltip_description
 string tooltip_label
+string widget_2x2_desc
+string widget_4x4_desc
 string widget_name
 style Base_Glance_AppWidget_Background
 style DialogWindowTheme
@@ -1701,3 +1711,5 @@ xml backup_rules
 xml data_extraction_rules
 xml glance_widget_info
 xml shortcuts
+xml widget_info_2x2
+xml widget_info_4x4

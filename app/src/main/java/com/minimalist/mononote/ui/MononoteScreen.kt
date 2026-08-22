@@ -9,18 +9,32 @@ import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -52,12 +66,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -85,7 +102,10 @@ import com.minimalist.mononote.ui.theme.IosLightPillBg
 import com.minimalist.mononote.ui.theme.IosLightPillBorder
 import com.minimalist.mononote.ui.theme.IosLightTextPlaceholder
 import com.minimalist.mononote.ui.theme.IosLightTextPrimary
+import com.minimalist.mononote.widget.Mononote2x2WidgetProvider
+import com.minimalist.mononote.widget.Mononote4x4WidgetProvider
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MononoteScreen(
     viewModel: MononoteViewModel,
@@ -93,6 +113,9 @@ fun MononoteScreen(
     onToggleTheme: () -> Unit
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val density = LocalDensity.current
+
     val activeNote by viewModel.activeNote.collectAsState()
     val archivedNotes by viewModel.archivedNotes.collectAsState()
     val showArchiveSheet by viewModel.showArchiveSheet.collectAsState()
@@ -102,6 +125,21 @@ fun MononoteScreen(
 
     val focusRequester = remember { FocusRequester() }
     val scrollState = rememberScrollState()
+
+    // Detect if Keyboard is open
+    val isKeyboardOpen = WindowInsets.isImeVisible
+
+    // Spinner rotation for saving indicator
+    val infiniteTransition = rememberInfiniteTransition(label = "saving")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
 
     // Color tokens matching the exact iOS Mononote screenshot
     val screenBg = if (isDark) IosDarkBackground else IosLightBackground
@@ -114,7 +152,7 @@ fun MononoteScreen(
     val pillBorder = if (isDark) IosDarkPillBorder else IosLightPillBorder
     val cursorColor = if (isDark) IosDarkTextPrimary else AppleBlue
 
-    // Voice Dictation Manager (available via menu as additional shortcut)
+    // Voice Dictation Manager
     val voiceInputState = rememberVoiceInput(
         onResult = { spokenText ->
             val updated = if (localContent.isBlank()) {
@@ -124,6 +162,8 @@ fun MononoteScreen(
             }
             localContent = updated
             viewModel.onContentChange(updated)
+            Mononote4x4WidgetProvider.updateAllWidgets(context)
+            Mononote2x2WidgetProvider.updateAllWidgets(context)
             Toast.makeText(context, "Voice note added ✨", Toast.LENGTH_SHORT).show()
         },
         onError = { msg ->
@@ -148,11 +188,10 @@ fun MononoteScreen(
         }
     }
 
-    // Auto-focus keyboard on launch so keyboard & dictation mic appear immediately
-    LaunchedEffect(Unit) {
-        try {
-            focusRequester.requestFocus()
-        } catch (_: Exception) {}
+    // Sync widgets on content change
+    LaunchedEffect(activeNote.content, activeNote.isLive) {
+        Mononote4x4WidgetProvider.updateAllWidgets(context)
+        Mononote2x2WidgetProvider.updateAllWidgets(context)
     }
 
     Scaffold(
@@ -196,7 +235,7 @@ fun MononoteScreen(
                     Icon(
                         imageVector = Icons.Default.IosShare,
                         contentDescription = "Share",
-                        tint = iconColor,
+                        tint = if (isKeyboardOpen) Color.Transparent else iconColor,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -219,7 +258,7 @@ fun MononoteScreen(
                         Icon(
                             imageVector = Icons.Default.MoreHoriz,
                             contentDescription = "More",
-                            tint = iconColor,
+                            tint = if (isKeyboardOpen) Color.Transparent else iconColor,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -307,19 +346,19 @@ fun MononoteScreen(
             }
 
             // ─────────────────────────────────────────────────────────────
-            // 2. CENTER HERO FLOATING STICKY CARD (Exact Screenshot Match)
+            // 2. CENTER HERO FLOATING STICKY CARD (With Save Indicator)
             // ─────────────────────────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                    .padding(horizontal = 24.dp, vertical = if (isKeyboardOpen) 4.dp else 8.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 340.dp, max = 460.dp)
+                        .heightIn(min = if (isKeyboardOpen) 220.dp else 340.dp, max = 460.dp)
                         .shadow(
                             elevation = if (isDark) 0.dp else 10.dp,
                             shape = RoundedCornerShape(26.dp),
@@ -348,6 +387,8 @@ fun MononoteScreen(
                         onValueChange = { newText ->
                             localContent = newText
                             viewModel.onContentChange(newText)
+                            Mononote4x4WidgetProvider.updateAllWidgets(context)
+                            Mononote2x2WidgetProvider.updateAllWidgets(context)
                         },
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Sentences,
@@ -370,90 +411,128 @@ fun MononoteScreen(
                             .verticalScroll(scrollState)
                             .focusRequester(focusRequester)
                     )
+
+                    // Subtle Saving / Synced Indicator (Bottom Right of Card)
+                    if (isKeyboardOpen) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(14.dp)
+                                .rotate(rotation)
+                                .border(1.5.dp, textPlaceholder.copy(alpha = 0.6f), CircleShape)
+                        )
+                    }
                 }
             }
 
             // ─────────────────────────────────────────────────────────────
-            // 3. BOTTOM BAR (Archive Box • ⭕ Go Live • 🗑️ Delete) — Exact 3 Items
+            // 3. BOTTOM SECTION: [Done] Button (Keyboard Open) OR Bottom Bar (Closed)
             // ─────────────────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 28.dp, vertical = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 1. Left: Archive Box Icon (Opens Archive Sheet)
-                IconButton(
-                    onClick = { viewModel.setArchiveSheetVisible(true) },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Inventory2,
-                        contentDescription = "Archive Timeline",
-                        tint = iconColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                // 2. Center: ⭕ Go Live Pill
+            if (isKeyboardOpen) {
+                // 🖤 BLACK "DONE" PILL BUTTON DIRECTLY ABOVE KEYBOARD (Screenshot Match)
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(if (activeNote.isLive) Color(0xFFFFECEB) else pillBg)
-                        .border(
-                            1.dp,
-                            if (activeNote.isLive) AppleRed else pillBorder,
-                            RoundedCornerShape(22.dp)
-                        )
-                        .clickable { viewModel.toggleLiveStatus() }
-                        .padding(horizontal = 18.dp, vertical = 9.dp),
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color(0xFF1C1C1E))
+                        .clickable {
+                            focusManager.clearFocus()
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (activeNote.isLive) {
-                            Box(
-                                modifier = Modifier
-                                    .size(7.dp)
-                                    .clip(CircleShape)
-                                    .background(AppleRed)
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(9.dp)
-                                    .border(1.5.dp, iconColor, CircleShape)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(7.dp))
-
-                        Text(
-                            text = if (activeNote.isLive) "LIVE" else "Go Live",
-                            color = if (activeNote.isLive) AppleRed else textPrimary,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            letterSpacing = 0.2.sp
+                    Text(
+                        text = "Done",
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.2.sp
+                    )
+                }
+            } else {
+                // 3-ITEM BOTTOM BAR (Archive Box • ⭕ Go Live • 🗑️ Delete)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 28.dp, vertical = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 1. Left: Archive Box Icon (Opens Archive Sheet)
+                    IconButton(
+                        onClick = { viewModel.setArchiveSheetVisible(true) },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Inventory2,
+                            contentDescription = "Archive Timeline",
+                            tint = iconColor,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                }
 
-                // 3. Right: Trash / Delete Icon (Archives & Clears Canvas)
-                IconButton(
-                    onClick = {
-                        if (localContent.isNotBlank()) {
-                            viewModel.archiveAndClear()
-                            Toast.makeText(context, "Note archived • Canvas cleared ✨", Toast.LENGTH_SHORT).show()
+                    // 2. Center: ⭕ Go Live Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(if (activeNote.isLive) Color(0xFFFFECEB) else pillBg)
+                            .border(
+                                1.dp,
+                                if (activeNote.isLive) AppleRed else pillBorder,
+                                RoundedCornerShape(22.dp)
+                            )
+                            .clickable { viewModel.toggleLiveStatus() }
+                            .padding(horizontal = 18.dp, vertical = 9.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (activeNote.isLive) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(7.dp)
+                                        .clip(CircleShape)
+                                        .background(AppleRed)
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(9.dp)
+                                        .border(1.5.dp, iconColor, CircleShape)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(7.dp))
+
+                            Text(
+                                text = if (activeNote.isLive) "LIVE" else "Go Live",
+                                color = if (activeNote.isLive) AppleRed else textPrimary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 0.2.sp
+                            )
                         }
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Delete,
-                        contentDescription = "Delete / Clear",
-                        tint = iconColor,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    }
+
+                    // 3. Right: Trash / Delete Icon (Archives & Clears Canvas)
+                    IconButton(
+                        onClick = {
+                            if (localContent.isNotBlank()) {
+                                viewModel.archiveAndClear()
+                                Mononote4x4WidgetProvider.updateAllWidgets(context)
+                                Mononote2x2WidgetProvider.updateAllWidgets(context)
+                                Toast.makeText(context, "Note archived • Canvas cleared ✨", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = "Delete / Clear",
+                            tint = iconColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
@@ -464,7 +543,11 @@ fun MononoteScreen(
         ArchiveSheet(
             archivedNotes = archivedNotes,
             isDark = isDark,
-            onRestore = { id -> viewModel.restoreArchivedNote(id) },
+            onRestore = { id ->
+                viewModel.restoreArchivedNote(id)
+                Mononote4x4WidgetProvider.updateAllWidgets(context)
+                Mononote2x2WidgetProvider.updateAllWidgets(context)
+            },
             onCopy = { text ->
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("Mononote", text))
