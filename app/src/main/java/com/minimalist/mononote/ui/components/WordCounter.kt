@@ -9,15 +9,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.minimalist.mononote.ui.theme.TextSecondaryDark
+import com.minimalist.mononote.ui.theme.DarkTextSecondary
+import com.minimalist.mononote.ui.theme.LightTextSecondary
 
 @Composable
 fun WordCounter(
     text: String,
+    isDark: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val words = if (text.isBlank()) 0 else text.trim().split("\\s+".toRegex()).size
     val chars = text.length
+    val textColor = if (isDark) DarkTextSecondary else LightTextSecondary
 
     Row(
         modifier = modifier,
@@ -25,19 +28,19 @@ fun WordCounter(
     ) {
         Text(
             text = "$words words",
-            color = TextSecondaryDark,
+            color = textColor,
             fontSize = 12.sp
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "•",
-            color = TextSecondaryDark,
+            color = textColor,
             fontSize = 12.sp
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "$chars chars",
-            color = TextSecondaryDark,
+            color = textColor,
             fontSize = 12.sp
         )
     }

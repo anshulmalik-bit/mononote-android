@@ -103,7 +103,7 @@ fun MononoteScreen(
                     .padding(horizontal = 24.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                WordCounter(text = localContent)
+                WordCounter(text = localContent, isDark = isDark)
                 Spacer(modifier = Modifier.weight(1f))
             }
 
