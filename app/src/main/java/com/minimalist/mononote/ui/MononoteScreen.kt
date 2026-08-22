@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -47,6 +48,8 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.MicNone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -133,7 +136,7 @@ fun MononoteScreen(
             }
             localContent = updated
             viewModel.onContentChange(updated)
-            Toast.makeText(context, "Voice added ✨", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Voice note added ✨", Toast.LENGTH_SHORT).show()
         },
         onError = { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
@@ -238,34 +241,6 @@ fun MononoteScreen(
                         onDismissRequest = { showMenu = false },
                         modifier = Modifier.background(cardBg)
                     ) {
-                        // 🎙️ Voice Dictation
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = if (voiceInputState.isListening) "Stop Listening" else "🎙️ Voice Dictation",
-                                    color = textPrimary,
-                                    fontSize = 14.sp
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                if (voiceInputState.isListening) {
-                                    voiceInputState.stopListening()
-                                } else {
-                                    val hasMicPerm = ContextCompat.checkSelfPermission(
-                                        context,
-                                        Manifest.permission.RECORD_AUDIO
-                                    ) == PackageManager.PERMISSION_GRANTED
-
-                                    if (hasMicPerm) {
-                                        voiceInputState.startListening()
-                                    } else {
-                                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                    }
-                                }
-                            }
-                        )
-
                         // 🔤 Font Style
                         DropdownMenuItem(
                             text = {
@@ -316,7 +291,7 @@ fun MononoteScreen(
             }
 
             // ─────────────────────────────────────────────────────────────
-            // 2. CENTER HERO FLOATING STICKY CARD (Exact Screenshot Match)
+            // 2. CENTER HERO FLOATING STICKY CARD
             // ─────────────────────────────────────────────────────────────
             Box(
                 modifier = Modifier
@@ -342,12 +317,12 @@ fun MononoteScreen(
                 ) {
                     if (localContent.isEmpty()) {
                         Text(
-                            text = "Start typing...",
+                            text = if (voiceInputState.isListening) "Listening... Speak now 🎙️" else "Start typing...",
                             style = TextStyle(
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = 15.sp,
                                 lineHeight = 24.sp,
-                                color = textPlaceholder
+                                color = if (voiceInputState.isListening) AppleRed else textPlaceholder
                             )
                         )
                     }
@@ -378,16 +353,16 @@ fun MononoteScreen(
             }
 
             // ─────────────────────────────────────────────────────────────
-            // 3. BOTTOM BAR (Archive Box • ⭕ Go Live • 🗑️ Delete)
+            // 3. BOTTOM BAR (Archive Box • 🎙️ Mic • ⭕ Go Live • 🗑️ Delete)
             // ─────────────────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 28.dp, vertical = 20.dp),
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left: Archive Box Icon (Opens Archive Sheet)
+                // 1. Left: Archive Box Icon
                 IconButton(
                     onClick = { viewModel.setArchiveSheetVisible(true) },
                     modifier = Modifier.size(40.dp)
@@ -396,11 +371,48 @@ fun MononoteScreen(
                         imageVector = Icons.Outlined.Inventory2,
                         contentDescription = "Archive Timeline",
                         tint = iconColor,
+                        modifier = Modifier.size(21.dp)
+                    )
+                }
+
+                // 2. 🎙️ 1-TAP ON-SCREEN VOICE MIC BUTTON
+                val micBg = if (voiceInputState.isListening) Color(0xFFFFECEB) else pillBg
+                val micBorder = if (voiceInputState.isListening) AppleRed else pillBorder
+                val micTint = if (voiceInputState.isListening) AppleRed else iconColor
+
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(micBg)
+                        .border(1.dp, micBorder, CircleShape)
+                        .clickable {
+                            if (voiceInputState.isListening) {
+                                voiceInputState.stopListening()
+                            } else {
+                                val hasMicPerm = ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.RECORD_AUDIO
+                                ) == PackageManager.PERMISSION_GRANTED
+
+                                if (hasMicPerm) {
+                                    voiceInputState.startListening()
+                                } else {
+                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                }
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (voiceInputState.isListening) Icons.Default.MicOff else Icons.Outlined.Mic,
+                        contentDescription = "Voice Dictation",
+                        tint = micTint,
                         modifier = Modifier.size(20.dp)
                     )
                 }
 
-                // Center: ⭕ Go Live Pill
+                // 3. Center: ⭕ Go Live Pill
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(22.dp))
@@ -442,7 +454,7 @@ fun MononoteScreen(
                     }
                 }
 
-                // Right: Trash / Delete Icon (Archives & Clears Canvas)
+                // 4. Right: Trash / Delete Icon (Archives & Clears Canvas)
                 IconButton(
                     onClick = {
                         if (localContent.isNotBlank()) {
@@ -456,7 +468,7 @@ fun MononoteScreen(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = "Delete / Clear",
                         tint = iconColor,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(21.dp)
                     )
                 }
             }
