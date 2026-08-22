@@ -63,6 +63,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        com.minimalist.mononote.widget.Mononote4x4WidgetProvider.updateAll(this)
+        com.minimalist.mononote.widget.Mononote2x2WidgetProvider.updateAll(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        com.minimalist.mononote.widget.Mononote4x4WidgetProvider.updateAll(this)
+        com.minimalist.mononote.widget.Mononote2x2WidgetProvider.updateAll(this)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIncomingIntent(intent)
