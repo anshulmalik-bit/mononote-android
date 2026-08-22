@@ -1709,7 +1709,6 @@ styleable GradientColor android_startColor android_endColor android_type android
 styleable GradientColorItem android_color android_offset
 xml backup_rules
 xml data_extraction_rules
-xml glance_widget_info
 xml shortcuts
 xml widget_info_2x2
 xml widget_info_4x4

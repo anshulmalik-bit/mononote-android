@@ -1748,7 +1748,6 @@ int styleable GradientColorItem_android_color 0
 int styleable GradientColorItem_android_offset 1
 int xml backup_rules 0x7f0f0000
 int xml data_extraction_rules 0x7f0f0001
-int xml glance_widget_info 0x7f0f0002
-int xml shortcuts 0x7f0f0003
-int xml widget_info_2x2 0x7f0f0004
-int xml widget_info_4x4 0x7f0f0005
+int xml shortcuts 0x7f0f0002
+int xml widget_info_2x2 0x7f0f0003
+int xml widget_info_4x4 0x7f0f0004

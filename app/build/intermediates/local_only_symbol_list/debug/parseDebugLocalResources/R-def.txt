@@ -34,7 +34,6 @@ string widget_name
 style Theme.Mononote
 xml backup_rules
 xml data_extraction_rules
-xml glance_widget_info
 xml shortcuts
 xml widget_info_2x2
 xml widget_info_4x4

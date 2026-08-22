@@ -20,41 +20,47 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class Mononote4x4WidgetProvider : AppWidgetProvider() {
+open class Mononote4x4WidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        updateAllWidgets(context)
+        updateWidgets(context, appWidgetManager, appWidgetIds)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        updateAllWidgets(context)
+        updateAll(context)
     }
 
     companion object {
+        fun updateAll(context: Context) {
+            updateAllWidgets(context)
+        }
+
         fun updateAllWidgets(context: Context) {
+            val manager = AppWidgetManager.getInstance(context) ?: return
+            val ids = manager.getAppWidgetIds(ComponentName(context, Mononote4x4WidgetProvider::class.java))
+            if (ids.isNotEmpty()) {
+                updateWidgets(context, manager, ids)
+            }
+        }
+
+        private fun updateWidgets(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
             CoroutineScope(Dispatchers.IO).launch {
                 val db = AppDatabase.getDatabase(context)
                 val note = db.noteDao().getActiveNoteDirect() ?: NoteEntity(isActive = true)
-                val manager = AppWidgetManager.getInstance(context)
-                val ids = manager.getAppWidgetIds(ComponentName(context, Mononote4x4WidgetProvider::class.java))
+                val text = note.content.ifBlank { "Start typing..." }
+                val timeStr = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(note.updatedAt))
 
                 withContext(Dispatchers.Main) {
-                    for (appWidgetId in ids) {
+                    for (appWidgetId in appWidgetIds) {
                         val views = RemoteViews(context.packageName, R.layout.widget_note_4x4)
-                        val text = note.content.ifBlank { "Start typing..." }
                         views.setTextViewText(R.id.widget_content, text)
-
-                        if (note.isLive) {
-                            views.setViewVisibility(R.id.widget_live_badge, View.VISIBLE)
-                        } else {
-                            views.setViewVisibility(R.id.widget_live_badge, View.GONE)
-                        }
-
-                        val timeStr = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(note.updatedAt))
                         views.setTextViewText(R.id.widget_time, timeStr)
+                        views.setViewVisibility(
+                            R.id.widget_live_badge,
+                            if (note.isLive) View.VISIBLE else View.GONE
+                        )
 
-                        // 1-Tap opens Mononote
                         val openIntent = Intent(context, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
@@ -66,7 +72,9 @@ class Mononote4x4WidgetProvider : AppWidgetProvider() {
                         )
                         views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
-                        manager.updateAppWidget(appWidgetId, views)
+                        try {
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                        } catch (_: Exception) {}
                     }
                 }
             }
@@ -74,38 +82,45 @@ class Mononote4x4WidgetProvider : AppWidgetProvider() {
     }
 }
 
-class Mononote2x2WidgetProvider : AppWidgetProvider() {
+open class Mononote2x2WidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        updateAllWidgets(context)
+        updateWidgets(context, appWidgetManager, appWidgetIds)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        updateAllWidgets(context)
+        updateAll(context)
     }
 
     companion object {
+        fun updateAll(context: Context) {
+            updateAllWidgets(context)
+        }
+
         fun updateAllWidgets(context: Context) {
+            val manager = AppWidgetManager.getInstance(context) ?: return
+            val ids = manager.getAppWidgetIds(ComponentName(context, Mononote2x2WidgetProvider::class.java))
+            if (ids.isNotEmpty()) {
+                updateWidgets(context, manager, ids)
+            }
+        }
+
+        private fun updateWidgets(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
             CoroutineScope(Dispatchers.IO).launch {
                 val db = AppDatabase.getDatabase(context)
                 val note = db.noteDao().getActiveNoteDirect() ?: NoteEntity(isActive = true)
-                val manager = AppWidgetManager.getInstance(context)
-                val ids = manager.getAppWidgetIds(ComponentName(context, Mononote2x2WidgetProvider::class.java))
+                val text = note.content.ifBlank { "Start typing..." }
 
                 withContext(Dispatchers.Main) {
-                    for (appWidgetId in ids) {
+                    for (appWidgetId in appWidgetIds) {
                         val views = RemoteViews(context.packageName, R.layout.widget_note_2x2)
-                        val text = note.content.ifBlank { "Start typing..." }
                         views.setTextViewText(R.id.widget_content, text)
+                        views.setViewVisibility(
+                            R.id.widget_live_badge,
+                            if (note.isLive) View.VISIBLE else View.GONE
+                        )
 
-                        if (note.isLive) {
-                            views.setViewVisibility(R.id.widget_live_badge, View.VISIBLE)
-                        } else {
-                            views.setViewVisibility(R.id.widget_live_badge, View.GONE)
-                        }
-
-                        // 1-Tap opens Mononote
                         val openIntent = Intent(context, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
@@ -117,10 +132,14 @@ class Mononote2x2WidgetProvider : AppWidgetProvider() {
                         )
                         views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
-                        manager.updateAppWidget(appWidgetId, views)
+                        try {
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                        } catch (_: Exception) {}
                     }
                 }
             }
         }
     }
 }
+
+class MononoteWidgetReceiver : Mononote4x4WidgetProvider()

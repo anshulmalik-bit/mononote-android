@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-124:12
-INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-124:12
-INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-124:12
-INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-124:12
+ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-137:12
+INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-137:12
+INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-137:12
+INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:2:1-137:12
 MERGED from [androidx.activity:activity:1.10.0] C:\Users\anshu\.gradle\caches\8.12\transforms\25018ae96132dddc256d95f08729a628\transformed\activity-1.10.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.glance:glance-appwidget:1.1.1] C:\Users\anshu\.gradle\caches\8.12\transforms\c6340af00739a1a24ac88d4f7ed5556b\transformed\glance-appwidget-1.1.1\AndroidManifest.xml:17:1-61:12
 MERGED from [androidx.glance:glance:1.1.1] C:\Users\anshu\.gradle\caches\8.12\transforms\b4f5d2d661d62701f8dd4afa7a6fa377\transformed\glance-1.1.1\AndroidManifest.xml:2:1-7:12
@@ -99,8 +99,8 @@ ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\An
 	android:name
 		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:10:22-86
 application
-ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:12:5-122:19
-INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:12:5-122:19
+ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:12:5-135:19
+INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:12:5-135:19
 MERGED from [androidx.glance:glance-appwidget:1.1.1] C:\Users\anshu\.gradle\caches\8.12\transforms\c6340af00739a1a24ac88d4f7ed5556b\transformed\glance-appwidget-1.1.1\AndroidManifest.xml:22:5-59:19
 MERGED from [androidx.glance:glance-appwidget:1.1.1] C:\Users\anshu\.gradle\caches\8.12\transforms\c6340af00739a1a24ac88d4f7ed5556b\transformed\glance-appwidget-1.1.1\AndroidManifest.xml:22:5-59:19
 MERGED from [androidx.work:work-runtime:2.7.1] C:\Users\anshu\.gradle\caches\8.12\transforms\9c96c6af274ca473ee961e5b8c13d86a\transformed\work-runtime-2.7.1\AndroidManifest.xml:30:5-143:19
@@ -283,12 +283,20 @@ ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\An
 		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:107:13-36
 	android:name
 		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:106:13-61
-service#com.minimalist.mononote.live.FloatingCapsuleService
-ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:118:9-120:40
+receiver#com.minimalist.mononote.widget.MononoteWidgetReceiver
+ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:118:9-128:20
+	android:label
+		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:121:13-42
 	android:exported
-		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:120:13-37
+		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:120:13-36
 	android:name
-		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:119:13-56
+		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:119:13-58
+service#com.minimalist.mononote.live.FloatingCapsuleService
+ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:131:9-133:40
+	android:exported
+		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:133:13-37
+	android:name
+		ADDED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml:132:13-56
 uses-sdk
 INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\anshu\AndroidStudioProjects\mononote-android\app\src\main\AndroidManifest.xml

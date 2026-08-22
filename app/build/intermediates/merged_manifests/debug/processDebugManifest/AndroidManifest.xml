@@ -138,6 +138,20 @@
                 android:resource="@xml/widget_info_2x2" />
         </receiver>
 
+        <!-- Legacy Widget Receiver for existing placed widgets -->
+        <receiver
+            android:name="com.minimalist.mononote.widget.MononoteWidgetReceiver"
+            android:exported="true"
+            android:label="Mononote Note" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info_4x4" />
+        </receiver>
+
         <!-- Floating Dynamic Capsule Service (Optional Overlay Pill) -->
         <service
             android:name="com.minimalist.mononote.live.FloatingCapsuleService"
