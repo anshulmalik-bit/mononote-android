@@ -1,0 +1,36 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.minimalist.mononote.app-mergeDebugResources-61:/values-v23/values-v23.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\anshu\\.gradle\\caches\\8.12\\transforms\\c6340af00739a1a24ac88d4f7ed5556b\\transformed\\glance-appwidget-1.1.1\\res\\values-v23\\values-v23.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    },
+                    "to": {
+                        "startLines": "4",
+                        "startColumns": "4",
+                        "startOffsets": "184",
+                        "endColumns": "55",
+                        "endOffsets": "235"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\anshu\\.gradle\\caches\\8.12\\transforms\\9c96c6af274ca473ee961e5b8c13d86a\\transformed\\work-runtime-2.7.1\\res\\values-v23\\values-v23.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,121",
+                        "endColumns": "65,62",
+                        "endOffsets": "116,179"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -13,6 +13,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,15 +24,33 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.FormatPaint
+import androidx.compose.material.icons.filled.IosShare
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,29 +63,37 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.minimalist.mononote.ui.components.ActionToolbar
 import com.minimalist.mononote.ui.components.rememberVoiceInput
-import com.minimalist.mononote.ui.theme.AmoledBlack
 import com.minimalist.mononote.ui.theme.AppleBlue
 import com.minimalist.mononote.ui.theme.AppleRed
-import com.minimalist.mononote.ui.theme.AppleWhite
-import com.minimalist.mononote.ui.theme.DarkBorder
-import com.minimalist.mononote.ui.theme.DarkSurfaceCard
-import com.minimalist.mononote.ui.theme.DarkTextDisabled
-import com.minimalist.mononote.ui.theme.DarkTextPrimary
-import com.minimalist.mononote.ui.theme.LightBorder
-import com.minimalist.mononote.ui.theme.LightSurfaceCard
-import com.minimalist.mononote.ui.theme.LightTextDisabled
-import com.minimalist.mononote.ui.theme.LightTextPrimary
-import com.minimalist.mononote.ui.theme.getEditorTypography
+import com.minimalist.mononote.ui.theme.IosDarkBackground
+import com.minimalist.mononote.ui.theme.IosDarkCard
+import com.minimalist.mononote.ui.theme.IosDarkCardBorder
+import com.minimalist.mononote.ui.theme.IosDarkIcon
+import com.minimalist.mononote.ui.theme.IosDarkPillBg
+import com.minimalist.mononote.ui.theme.IosDarkPillBorder
+import com.minimalist.mononote.ui.theme.IosDarkTextPlaceholder
+import com.minimalist.mononote.ui.theme.IosDarkTextPrimary
+import com.minimalist.mononote.ui.theme.IosLightBackground
+import com.minimalist.mononote.ui.theme.IosLightCard
+import com.minimalist.mononote.ui.theme.IosLightCardBorder
+import com.minimalist.mononote.ui.theme.IosLightIcon
+import com.minimalist.mononote.ui.theme.IosLightPillBg
+import com.minimalist.mononote.ui.theme.IosLightPillBorder
+import com.minimalist.mononote.ui.theme.IosLightTextPlaceholder
+import com.minimalist.mononote.ui.theme.IosLightTextPrimary
 
 @Composable
 fun MononoteScreen(
@@ -77,13 +107,21 @@ fun MononoteScreen(
     val showArchiveSheet by viewModel.showArchiveSheet.collectAsState()
 
     var localContent by remember { mutableStateOf("") }
+    var showMenu by remember { mutableStateOf(false) }
+
     val focusRequester = remember { FocusRequester() }
     val scrollState = rememberScrollState()
 
-    val screenBg = if (isDark) AmoledBlack else AppleWhite
-    val textPrimary = if (isDark) DarkTextPrimary else LightTextPrimary
-    val textDisabled = if (isDark) DarkTextDisabled else LightTextDisabled
-    val cursorColor = if (isDark) DarkTextPrimary else AppleBlue
+    // Color tokens matching the exact iOS Mononote screenshot
+    val screenBg = if (isDark) IosDarkBackground else IosLightBackground
+    val cardBg = if (isDark) IosDarkCard else IosLightCard
+    val cardBorder = if (isDark) IosDarkCardBorder else IosLightCardBorder
+    val textPrimary = if (isDark) IosDarkTextPrimary else IosLightTextPrimary
+    val textPlaceholder = if (isDark) IosDarkTextPlaceholder else IosLightTextPlaceholder
+    val iconColor = if (isDark) IosDarkIcon else IosLightIcon
+    val pillBg = if (isDark) IosDarkPillBg else IosLightPillBg
+    val pillBorder = if (isDark) IosDarkPillBorder else IosLightPillBorder
+    val cursorColor = if (isDark) IosDarkTextPrimary else AppleBlue
 
     // Voice Dictation Manager
     val voiceInputState = rememberVoiceInput(
@@ -91,7 +129,7 @@ fun MononoteScreen(
             val updated = if (localContent.isBlank()) {
                 spokenText
             } else {
-                "$localContent\n• $spokenText"
+                "$localContent\n$spokenText"
             }
             localContent = updated
             viewModel.onContentChange(updated)
@@ -102,7 +140,6 @@ fun MononoteScreen(
         }
     )
 
-    // Permission launcher for microphone
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -138,123 +175,291 @@ fun MononoteScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(screenBg)
+                .background(screenBg),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // TOP LISTENING BANNER (Subtle animation when voice is active)
-            AnimatedVisibility(
-                visible = voiceInputState.isListening,
-                enter = fadeIn(),
-                exit = fadeOut()
+            // ─────────────────────────────────────────────────────────────
+            // 1. TOP BAR (Share • Mononote • ...)
+            // ─────────────────────────────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 6.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (isDark) DarkSurfaceCard else LightSurfaceCard)
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "🔴",
-                                fontSize = 10.sp
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Listening... Speak now",
-                                fontSize = 12.sp,
-                                color = if (isDark) DarkTextPrimary else LightTextPrimary,
-                                fontWeight = FontWeight.Medium
-                            )
+                // Left: Share Icon
+                IconButton(
+                    onClick = {
+                        if (localContent.isNotBlank()) {
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, localContent)
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Share Note"))
                         }
+                    },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.IosShare,
+                        contentDescription = "Share",
+                        tint = iconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Center: Mononote Title
+                Text(
+                    text = "Mononote",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textPrimary,
+                    letterSpacing = (-0.2).sp
+                )
+
+                // Right: ... (More Menu)
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreHoriz,
+                            contentDescription = "More",
+                            tint = iconColor,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(cardBg)
+                    ) {
+                        // 🎙️ Voice Dictation
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (voiceInputState.isListening) "Stop Listening" else "🎙️ Voice Dictation",
+                                    color = textPrimary,
+                                    fontSize = 14.sp
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                if (voiceInputState.isListening) {
+                                    voiceInputState.stopListening()
+                                } else {
+                                    val hasMicPerm = ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.RECORD_AUDIO
+                                    ) == PackageManager.PERMISSION_GRANTED
+
+                                    if (hasMicPerm) {
+                                        voiceInputState.startListening()
+                                    } else {
+                                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                    }
+                                }
+                            }
+                        )
+
+                        // 🔤 Font Style
+                        DropdownMenuItem(
+                            text = {
+                                val fontName = when (activeNote.fontStyle) {
+                                    "mono" -> "Font: Monospace"
+                                    "serif" -> "Font: Serif"
+                                    else -> "Font: Sans"
+                                }
+                                Text(
+                                    text = fontName,
+                                    color = textPrimary,
+                                    fontSize = 14.sp
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                viewModel.cycleFontStyle()
+                            }
+                        )
+
+                        // ☀️ / 🌙 Theme Toggle
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (isDark) "☀️ Light Mode" else "🌙 Dark Mode",
+                                    color = textPrimary,
+                                    fontSize = 14.sp
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onToggleTheme()
+                            }
+                        )
+
+                        // 📋 Copy All
+                        DropdownMenuItem(
+                            text = { Text("📋 Copy All", color = textPrimary, fontSize = 14.sp) },
+                            onClick = {
+                                showMenu = false
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText("Mononote", localContent))
+                                Toast.makeText(context, "Copied to clipboard 📋", Toast.LENGTH_SHORT).show()
+                            }
+                        )
                     }
                 }
             }
 
-            // MAIN SINGLE-NOTE CANVAS (Pure distraction-free Apple iOS paper canvas)
+            // ─────────────────────────────────────────────────────────────
+            // 2. CENTER HERO FLOATING STICKY CARD (Exact Screenshot Match)
+            // ─────────────────────────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                if (localContent.isEmpty()) {
-                    Text(
-                        text = "Write anything...",
-                        style = getEditorTypography(activeNote.fontStyle, activeNote.fontSize, isDark).copy(
-                            color = textDisabled
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 340.dp, max = 460.dp)
+                        .shadow(
+                            elevation = if (isDark) 0.dp else 10.dp,
+                            shape = RoundedCornerShape(26.dp),
+                            spotColor = Color(0x1A000000),
+                            ambientColor = Color(0x10000000)
                         )
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(cardBg)
+                        .border(1.dp, cardBorder, RoundedCornerShape(26.dp))
+                        .padding(24.dp)
+                ) {
+                    if (localContent.isEmpty()) {
+                        Text(
+                            text = "Start typing...",
+                            style = TextStyle(
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 15.sp,
+                                lineHeight = 24.sp,
+                                color = textPlaceholder
+                            )
+                        )
+                    }
+
+                    BasicTextField(
+                        value = localContent,
+                        onValueChange = { newText ->
+                            localContent = newText
+                            viewModel.onContentChange(newText)
+                        },
+                        textStyle = TextStyle(
+                            fontFamily = when (activeNote.fontStyle) {
+                                "sans" -> FontFamily.Default
+                                "serif" -> FontFamily.Serif
+                                else -> FontFamily.Monospace
+                            },
+                            fontSize = 15.sp,
+                            lineHeight = 24.sp,
+                            color = textPrimary
+                        ),
+                        cursorBrush = SolidColor(cursorColor),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .focusRequester(focusRequester)
+                    )
+                }
+            }
+
+            // ─────────────────────────────────────────────────────────────
+            // 3. BOTTOM BAR (Archive Box • ⭕ Go Live • 🗑️ Delete)
+            // ─────────────────────────────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 28.dp, vertical = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left: Archive Box Icon (Opens Archive Sheet)
+                IconButton(
+                    onClick = { viewModel.setArchiveSheetVisible(true) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Inventory2,
+                        contentDescription = "Archive Timeline",
+                        tint = iconColor,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                BasicTextField(
-                    value = localContent,
-                    onValueChange = { newText ->
-                        localContent = newText
-                        viewModel.onContentChange(newText)
-                    },
-                    textStyle = getEditorTypography(activeNote.fontStyle, activeNote.fontSize, isDark),
-                    cursorBrush = SolidColor(cursorColor),
+                // Center: ⭕ Go Live Pill
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .focusRequester(focusRequester)
-                )
-            }
-
-            // BOTTOM ACTION TOOLBAR
-            ActionToolbar(
-                isLive = activeNote.isLive,
-                isDark = isDark,
-                isListening = voiceInputState.isListening,
-                fontStyle = activeNote.fontStyle,
-                onToggleLive = { viewModel.toggleLiveStatus() },
-                onToggleVoice = {
-                    if (voiceInputState.isListening) {
-                        voiceInputState.stopListening()
-                    } else {
-                        val hasMicPerm = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.RECORD_AUDIO
-                        ) == PackageManager.PERMISSION_GRANTED
-
-                        if (hasMicPerm) {
-                            voiceInputState.startListening()
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(if (activeNote.isLive) Color(0xFFFFECEB) else pillBg)
+                        .border(
+                            1.dp,
+                            if (activeNote.isLive) AppleRed else pillBorder,
+                            RoundedCornerShape(22.dp)
+                        )
+                        .clickable { viewModel.toggleLiveStatus() }
+                        .padding(horizontal = 18.dp, vertical = 9.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (activeNote.isLive) {
+                            Box(
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(AppleRed)
+                            )
                         } else {
-                            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            Box(
+                                modifier = Modifier
+                                    .size(9.dp)
+                                    .border(1.5.dp, iconColor, CircleShape)
+                            )
                         }
+
+                        Spacer(modifier = Modifier.width(7.dp))
+
+                        Text(
+                            text = if (activeNote.isLive) "LIVE" else "Go Live",
+                            color = if (activeNote.isLive) AppleRed else textPrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.2.sp
+                        )
                     }
-                },
-                onToggleTheme = onToggleTheme,
-                onCycleFont = { viewModel.cycleFontStyle() },
-                onCopy = {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("Mononote", localContent))
-                    Toast.makeText(context, "Copied to clipboard 📋", Toast.LENGTH_SHORT).show()
-                },
-                onShare = {
-                    if (localContent.isNotBlank()) {
-                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, localContent)
-                        }
-                        context.startActivity(Intent.createChooser(shareIntent, "Share Note"))
-                    }
-                },
-                onArchive = {
-                    if (localContent.isNotBlank()) {
-                        viewModel.archiveAndClear()
-                        Toast.makeText(context, "Note archived • Fresh canvas ready ✨", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                onOpenArchiveHistory = {
-                    viewModel.setArchiveSheetVisible(true)
                 }
-            )
+
+                // Right: Trash / Delete Icon (Archives & Clears Canvas)
+                IconButton(
+                    onClick = {
+                        if (localContent.isNotBlank()) {
+                            viewModel.archiveAndClear()
+                            Toast.makeText(context, "Note archived • Canvas cleared ✨", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Delete / Clear",
+                        tint = iconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
     }
 

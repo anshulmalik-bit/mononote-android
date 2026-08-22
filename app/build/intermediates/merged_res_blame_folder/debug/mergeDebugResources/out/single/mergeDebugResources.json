@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "com.minimalist.mononote.app-debug-63:/drawable_ic_live.xml.flat",
+        "source": "com.minimalist.mononote.app-main-65:/drawable/ic_live.xml"
+    },
+    {
+        "merged": "com.minimalist.mononote.app-debug-63:/xml_glance_widget_info.xml.flat",
+        "source": "com.minimalist.mononote.app-main-65:/xml/glance_widget_info.xml"
+    },
+    {
+        "merged": "com.minimalist.mononote.app-debug-63:/drawable_ic_mononote.xml.flat",
+        "source": "com.minimalist.mononote.app-main-65:/drawable/ic_mononote.xml"
+    },
+    {
+        "merged": "com.minimalist.mononote.app-debug-63:/xml_backup_rules.xml.flat",
+        "source": "com.minimalist.mononote.app-main-65:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.minimalist.mononote.app-debug-63:/xml_shortcuts.xml.flat",
+        "source": "com.minimalist.mononote.app-main-65:/xml/shortcuts.xml"
+    },
+    {
+        "merged": "com.minimalist.mononote.app-debug-63:/xml_data_extraction_rules.xml.flat",
+        "source": "com.minimalist.mononote.app-main-65:/xml/data_extraction_rules.xml"
+    }
+]

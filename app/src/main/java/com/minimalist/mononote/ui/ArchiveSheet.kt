@@ -34,20 +34,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.minimalist.mononote.data.NoteEntity
-import com.minimalist.mononote.ui.theme.AmoledBlack
-import com.minimalist.mononote.ui.theme.AppleWhite
-import com.minimalist.mononote.ui.theme.DarkBorder
-import com.minimalist.mononote.ui.theme.DarkSurface
-import com.minimalist.mononote.ui.theme.DarkSurfaceCard
-import com.minimalist.mononote.ui.theme.DarkTextDisabled
-import com.minimalist.mononote.ui.theme.DarkTextPrimary
-import com.minimalist.mononote.ui.theme.DarkTextSecondary
-import com.minimalist.mononote.ui.theme.LightBorder
-import com.minimalist.mononote.ui.theme.LightSurface
-import com.minimalist.mononote.ui.theme.LightSurfaceCard
-import com.minimalist.mononote.ui.theme.LightTextDisabled
-import com.minimalist.mononote.ui.theme.LightTextPrimary
-import com.minimalist.mononote.ui.theme.LightTextSecondary
+import com.minimalist.mononote.ui.theme.IosDarkBackground
+import com.minimalist.mononote.ui.theme.IosDarkCard
+import com.minimalist.mononote.ui.theme.IosDarkCardBorder
+import com.minimalist.mononote.ui.theme.IosDarkIcon
+import com.minimalist.mononote.ui.theme.IosDarkTextPlaceholder
+import com.minimalist.mononote.ui.theme.IosDarkTextPrimary
+import com.minimalist.mononote.ui.theme.IosLightBackground
+import com.minimalist.mononote.ui.theme.IosLightCard
+import com.minimalist.mononote.ui.theme.IosLightCardBorder
+import com.minimalist.mononote.ui.theme.IosLightIcon
+import com.minimalist.mononote.ui.theme.IosLightTextPlaceholder
+import com.minimalist.mononote.ui.theme.IosLightTextPrimary
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,17 +61,17 @@ fun ArchiveSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val sheetBg = if (isDark) DarkSurface else LightSurface
-    val textPrimary = if (isDark) DarkTextPrimary else LightTextPrimary
-    val textSecondary = if (isDark) DarkTextSecondary else LightTextSecondary
-    val textDisabled = if (isDark) DarkTextDisabled else LightTextDisabled
+    val sheetBg = if (isDark) IosDarkBackground else IosLightBackground
+    val textPrimary = if (isDark) IosDarkTextPrimary else IosLightTextPrimary
+    val textSecondary = if (isDark) IosDarkIcon else IosLightIcon
+    val textDisabled = if (isDark) IosDarkTextPlaceholder else IosLightTextPlaceholder
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = sheetBg,
         contentColor = textPrimary,
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -87,7 +85,7 @@ fun ArchiveSheet(
             ) {
                 Text(
                     text = "Archive Timeline",
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = textPrimary
                 )
@@ -145,19 +143,19 @@ fun ArchivedNoteCard(
     onDelete: () -> Unit
 ) {
     val dateStr = SimpleDateFormat("MMM d, yyyy • h:mm a", Locale.getDefault()).format(Date(note.updatedAt))
-    val bg = if (isDark) DarkSurfaceCard else LightSurfaceCard
-    val border = if (isDark) DarkBorder else LightBorder
-    val textPrimary = if (isDark) DarkTextPrimary else LightTextPrimary
-    val textSecondary = if (isDark) DarkTextSecondary else LightTextSecondary
-    val textDisabled = if (isDark) DarkTextDisabled else LightTextDisabled
+    val bg = if (isDark) IosDarkCard else IosLightCard
+    val border = if (isDark) IosDarkCardBorder else IosLightCardBorder
+    val textPrimary = if (isDark) IosDarkTextPrimary else IosLightTextPrimary
+    val textSecondary = if (isDark) IosDarkIcon else IosLightIcon
+    val textDisabled = if (isDark) IosDarkTextPlaceholder else IosLightTextPlaceholder
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(bg)
-            .border(1.dp, border, RoundedCornerShape(14.dp))
-            .padding(14.dp)
+            .border(1.dp, border, RoundedCornerShape(16.dp))
+            .padding(16.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
