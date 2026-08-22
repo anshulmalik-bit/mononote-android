@@ -1,10 +1,5 @@
 package com.minimalist.mononote.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,33 +16,38 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.FiberManualRecord
-import androidx.compose.material.icons.filled.FormatPaint
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.minimalist.mononote.ui.theme.AmoledBlack
-import com.minimalist.mononote.ui.theme.LiveRed
-import com.minimalist.mononote.ui.theme.SurfaceCard
-import com.minimalist.mononote.ui.theme.SurfaceVariantDark
-import com.minimalist.mononote.ui.theme.TextPrimaryDark
-import com.minimalist.mononote.ui.theme.TextSecondaryDark
+import com.minimalist.mononote.ui.theme.AppleRed
+import com.minimalist.mononote.ui.theme.DarkBorder
+import com.minimalist.mononote.ui.theme.DarkSurfaceCard
+import com.minimalist.mononote.ui.theme.DarkTextPrimary
+import com.minimalist.mononote.ui.theme.DarkTextSecondary
+import com.minimalist.mononote.ui.theme.LightBorder
+import com.minimalist.mononote.ui.theme.LightSurfaceCard
+import com.minimalist.mononote.ui.theme.LightTextPrimary
+import com.minimalist.mononote.ui.theme.LightTextSecondary
 
 @Composable
 fun ActionToolbar(
     isLive: Boolean,
+    isDark: Boolean,
     fontStyle: String,
     onToggleLive: () -> Unit,
+    onToggleTheme: () -> Unit,
     onCycleFont: () -> Unit,
     onCopy: () -> Unit,
     onShare: () -> Unit,
@@ -56,68 +55,97 @@ fun ActionToolbar(
     onOpenArchiveHistory: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val iconTint = if (isDark) DarkTextSecondary else LightTextSecondary
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 🔴 GO LIVE BUTTON (With Live Indicator)
+        // 🔴 GO LIVE BUTTON (Apple iOS Capsule Style)
         GoLiveButton(
             isLive = isLive,
+            isDark = isDark,
             onClick = onToggleLive
         )
 
-        // RIGHT ACTION ICONS
+        // RIGHT ACTION CONTROLS
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Font Switcher (Sans / Mono / Serif)
+            // Typography Switcher (SANS / SERIF / MONO)
             FontBadge(
                 fontStyle = fontStyle,
+                isDark = isDark,
                 onClick = onCycleFont
             )
 
             Spacer(modifier = Modifier.width(4.dp))
 
+            // ☀️ / 🌙 Theme Toggle
+            IconButton(
+                onClick = onToggleTheme,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
+                    contentDescription = "Toggle Theme",
+                    tint = iconTint,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+
             // Copy
-            IconButton(onClick = onCopy) {
+            IconButton(
+                onClick = onCopy,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.ContentCopy,
                     contentDescription = "Copy",
-                    tint = TextSecondaryDark,
-                    modifier = Modifier.size(20.dp)
+                    tint = iconTint,
+                    modifier = Modifier.size(19.dp)
                 )
             }
 
             // Share
-            IconButton(onClick = onShare) {
+            IconButton(
+                onClick = onShare,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = "Share",
-                    tint = TextSecondaryDark,
-                    modifier = Modifier.size(20.dp)
+                    tint = iconTint,
+                    modifier = Modifier.size(19.dp)
                 )
             }
 
-            // Archive Current Note & Start Fresh
-            IconButton(onClick = onArchive) {
+            // Archive & Clear Canvas (New Note)
+            IconButton(
+                onClick = onArchive,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Archive,
                     contentDescription = "Archive and Clear",
-                    tint = TextSecondaryDark,
-                    modifier = Modifier.size(20.dp)
+                    tint = iconTint,
+                    modifier = Modifier.size(19.dp)
                 )
             }
 
-            // View Past History
-            IconButton(onClick = onOpenArchiveHistory) {
+            // Archive History Timeline
+            IconButton(
+                onClick = onOpenArchiveHistory,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.History,
                     contentDescription = "Archive History",
-                    tint = TextSecondaryDark,
-                    modifier = Modifier.size(20.dp)
+                    tint = iconTint,
+                    modifier = Modifier.size(19.dp)
                 )
             }
         }
@@ -127,35 +155,51 @@ fun ActionToolbar(
 @Composable
 fun GoLiveButton(
     isLive: Boolean,
+    isDark: Boolean,
     onClick: () -> Unit
 ) {
-    val liveBgColor = if (isLive) Color(0xFF2A1010) else SurfaceCard
-    val liveBorderColor = if (isLive) LiveRed else Color.Transparent
+    val bg = when {
+        isLive && isDark -> Color(0xFF2C1414)
+        isLive && !isDark -> Color(0xFFFFECEB)
+        !isLive && isDark -> DarkSurfaceCard
+        else -> LightSurfaceCard
+    }
+
+    val border = when {
+        isLive -> AppleRed
+        isDark -> DarkBorder
+        else -> LightBorder
+    }
+
+    val textColor = when {
+        isLive -> AppleRed
+        isDark -> DarkTextPrimary
+        else -> LightTextPrimary
+    }
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(liveBgColor)
-            .border(1.dp, liveBorderColor, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(bg)
+            .border(1.dp, border, RoundedCornerShape(18.dp))
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 7.dp),
         contentAlignment = Alignment.Center
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(8.dp)
+                    .size(7.dp)
                     .clip(CircleShape)
-                    .background(if (isLive) LiveRed else TextSecondaryDark)
+                    .background(if (isLive) AppleRed else if (isDark) DarkTextSecondary else LightTextSecondary)
             )
             Spacer(modifier = Modifier.width(7.dp))
             Text(
                 text = if (isLive) "LIVE" else "Go Live",
-                color = if (isLive) LiveRed else TextPrimaryDark,
+                color = textColor,
                 fontSize = 12.sp,
-                letterSpacing = 0.5.sp
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.3.sp
             )
         }
     }
@@ -164,6 +208,7 @@ fun GoLiveButton(
 @Composable
 fun FontBadge(
     fontStyle: String,
+    isDark: Boolean,
     onClick: () -> Unit
 ) {
     val label = when (fontStyle) {
@@ -172,18 +217,24 @@ fun FontBadge(
         else -> "SANS"
     }
 
+    val bg = if (isDark) DarkSurfaceCard else LightSurfaceCard
+    val border = if (isDark) DarkBorder else LightBorder
+    val textColor = if (isDark) DarkTextSecondary else LightTextSecondary
+
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(SurfaceCard)
+            .clip(RoundedCornerShape(14.dp))
+            .background(bg)
+            .border(1.dp, border, RoundedCornerShape(14.dp))
             .clickable { onClick() }
             .padding(horizontal = 9.dp, vertical = 5.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
-            color = TextSecondaryDark,
+            color = textColor,
             fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.5.sp
         )
     }

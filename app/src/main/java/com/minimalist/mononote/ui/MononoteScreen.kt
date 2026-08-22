@@ -39,13 +39,21 @@ import androidx.compose.ui.unit.sp
 import com.minimalist.mononote.ui.components.ActionToolbar
 import com.minimalist.mononote.ui.components.WordCounter
 import com.minimalist.mononote.ui.theme.AmoledBlack
-import com.minimalist.mononote.ui.theme.TextDisabledDark
-import com.minimalist.mononote.ui.theme.TextPrimaryDark
+import com.minimalist.mononote.ui.theme.AppleBlue
+import com.minimalist.mononote.ui.theme.AppleWhite
+import com.minimalist.mononote.ui.theme.DarkTextDisabled
+import com.minimalist.mononote.ui.theme.DarkTextPrimary
+import com.minimalist.mononote.ui.theme.DarkTextSecondary
+import com.minimalist.mononote.ui.theme.LightTextDisabled
+import com.minimalist.mononote.ui.theme.LightTextPrimary
+import com.minimalist.mononote.ui.theme.LightTextSecondary
 import com.minimalist.mononote.ui.theme.getEditorTypography
 
 @Composable
 fun MononoteScreen(
-    viewModel: MononoteViewModel
+    viewModel: MononoteViewModel,
+    isDark: Boolean,
+    onToggleTheme: () -> Unit
 ) {
     val context = LocalContext.current
     val activeNote by viewModel.activeNote.collectAsState()
@@ -55,6 +63,11 @@ fun MononoteScreen(
     var localContent by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val scrollState = rememberScrollState()
+
+    val screenBg = if (isDark) AmoledBlack else AppleWhite
+    val textPrimary = if (isDark) DarkTextPrimary else LightTextPrimary
+    val textDisabled = if (isDark) DarkTextDisabled else LightTextDisabled
+    val cursorColor = if (isDark) DarkTextPrimary else AppleBlue
 
     // Sync local state with database
     LaunchedEffect(activeNote.id, activeNote.content) {
@@ -71,7 +84,7 @@ fun MononoteScreen(
     }
 
     Scaffold(
-        containerColor = AmoledBlack,
+        containerColor = screenBg,
         modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()
@@ -81,32 +94,32 @@ fun MononoteScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(AmoledBlack)
+                .background(screenBg)
         ) {
-            // TOP HEADER: Word Counter & Live Indicator
+            // TOP HEADER: Word Counter
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                    .padding(horizontal = 24.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 WordCounter(text = localContent)
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // MAIN SINGLE-NOTE CANVAS
+            // MAIN SINGLE-NOTE CANVAS (Apple iOS Minimalist Style)
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 24.dp)
                     .verticalScroll(scrollState)
             ) {
                 if (localContent.isEmpty()) {
                     Text(
                         text = "Capture a thought, daily focus, or task list...\n\nTap \"Go Live\" to pin this note to your lock screen & status bar.",
-                        style = getEditorTypography(activeNote.fontStyle, activeNote.fontSize).copy(
-                            color = TextDisabledDark
+                        style = getEditorTypography(activeNote.fontStyle, activeNote.fontSize, isDark).copy(
+                            color = textDisabled
                         )
                     )
                 }
@@ -117,8 +130,8 @@ fun MononoteScreen(
                         localContent = newText
                         viewModel.onContentChange(newText)
                     },
-                    textStyle = getEditorTypography(activeNote.fontStyle, activeNote.fontSize),
-                    cursorBrush = SolidColor(TextPrimaryDark),
+                    textStyle = getEditorTypography(activeNote.fontStyle, activeNote.fontSize, isDark),
+                    cursorBrush = SolidColor(cursorColor),
                     modifier = Modifier
                         .fillMaxSize()
                         .focusRequester(focusRequester)
@@ -128,8 +141,10 @@ fun MononoteScreen(
             // BOTTOM ACTION TOOLBAR
             ActionToolbar(
                 isLive = activeNote.isLive,
+                isDark = isDark,
                 fontStyle = activeNote.fontStyle,
                 onToggleLive = { viewModel.toggleLiveStatus() },
+                onToggleTheme = onToggleTheme,
                 onCycleFont = { viewModel.cycleFontStyle() },
                 onCopy = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -162,6 +177,7 @@ fun MononoteScreen(
     if (showArchiveSheet) {
         ArchiveSheet(
             archivedNotes = archivedNotes,
+            isDark = isDark,
             onRestore = { id -> viewModel.restoreArchivedNote(id) },
             onCopy = { text ->
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

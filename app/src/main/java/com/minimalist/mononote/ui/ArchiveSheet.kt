@@ -1,6 +1,7 @@
 package com.minimalist.mononote.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,11 +35,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.minimalist.mononote.data.NoteEntity
 import com.minimalist.mononote.ui.theme.AmoledBlack
-import com.minimalist.mononote.ui.theme.SurfaceCard
-import com.minimalist.mononote.ui.theme.SurfaceDark
-import com.minimalist.mononote.ui.theme.TextDisabledDark
-import com.minimalist.mononote.ui.theme.TextPrimaryDark
-import com.minimalist.mononote.ui.theme.TextSecondaryDark
+import com.minimalist.mononote.ui.theme.AppleWhite
+import com.minimalist.mononote.ui.theme.DarkBorder
+import com.minimalist.mononote.ui.theme.DarkSurface
+import com.minimalist.mononote.ui.theme.DarkSurfaceCard
+import com.minimalist.mononote.ui.theme.DarkTextDisabled
+import com.minimalist.mononote.ui.theme.DarkTextPrimary
+import com.minimalist.mononote.ui.theme.DarkTextSecondary
+import com.minimalist.mononote.ui.theme.LightBorder
+import com.minimalist.mononote.ui.theme.LightSurface
+import com.minimalist.mononote.ui.theme.LightSurfaceCard
+import com.minimalist.mononote.ui.theme.LightTextDisabled
+import com.minimalist.mononote.ui.theme.LightTextPrimary
+import com.minimalist.mononote.ui.theme.LightTextSecondary
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -47,18 +56,24 @@ import java.util.Locale
 @Composable
 fun ArchiveSheet(
     archivedNotes: List<NoteEntity>,
+    isDark: Boolean,
     onRestore: (Long) -> Unit,
     onCopy: (String) -> Unit,
     onDelete: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetBg = if (isDark) DarkSurface else LightSurface
+    val textPrimary = if (isDark) DarkTextPrimary else LightTextPrimary
+    val textSecondary = if (isDark) DarkTextSecondary else LightTextSecondary
+    val textDisabled = if (isDark) DarkTextDisabled else LightTextDisabled
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = SurfaceDark,
-        contentColor = TextPrimaryDark
+        containerColor = sheetBg,
+        contentColor = textPrimary,
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -74,12 +89,12 @@ fun ArchiveSheet(
                     text = "Archive Timeline",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimaryDark
+                    color = textPrimary
                 )
                 Text(
                     text = "${archivedNotes.size} notes",
                     fontSize = 12.sp,
-                    color = TextSecondaryDark
+                    color = textSecondary
                 )
             }
 
@@ -94,7 +109,7 @@ fun ArchiveSheet(
                 ) {
                     Text(
                         text = "No archived notes yet.\nWhen you clear your canvas, old notes appear here.",
-                        color = TextDisabledDark,
+                        color = textDisabled,
                         fontSize = 14.sp,
                         lineHeight = 20.sp
                     )
@@ -102,11 +117,12 @@ fun ArchiveSheet(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(archivedNotes, key = { it.id }) { note ->
                         ArchivedNoteCard(
                             note = note,
+                            isDark = isDark,
                             onRestore = { onRestore(note.id) },
                             onCopy = { onCopy(note.content) },
                             onDelete = { onDelete(note.id) }
@@ -123,24 +139,31 @@ fun ArchiveSheet(
 @Composable
 fun ArchivedNoteCard(
     note: NoteEntity,
+    isDark: Boolean,
     onRestore: () -> Unit,
     onCopy: () -> Unit,
     onDelete: () -> Unit
 ) {
     val dateStr = SimpleDateFormat("MMM d, yyyy • h:mm a", Locale.getDefault()).format(Date(note.updatedAt))
+    val bg = if (isDark) DarkSurfaceCard else LightSurfaceCard
+    val border = if (isDark) DarkBorder else LightBorder
+    val textPrimary = if (isDark) DarkTextPrimary else LightTextPrimary
+    val textSecondary = if (isDark) DarkTextSecondary else LightTextSecondary
+    val textDisabled = if (isDark) DarkTextDisabled else LightTextDisabled
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(SurfaceCard)
+            .clip(RoundedCornerShape(14.dp))
+            .background(bg)
+            .border(1.dp, border, RoundedCornerShape(14.dp))
             .padding(14.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = dateStr,
                 fontSize = 11.sp,
-                color = TextSecondaryDark,
+                color = textSecondary,
                 fontWeight = FontWeight.Medium
             )
 
@@ -149,7 +172,7 @@ fun ArchivedNoteCard(
             Text(
                 text = note.content.ifBlank { "(Empty Note)" },
                 fontSize = 14.sp,
-                color = TextPrimaryDark,
+                color = textPrimary,
                 maxLines = 4,
                 lineHeight = 20.sp
             )
@@ -161,10 +184,10 @@ fun ArchivedNoteCard(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Restore to Active Canvas
+                // Restore Button
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .clickable { onRestore() }
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -172,20 +195,20 @@ fun ArchivedNoteCard(
                     Icon(
                         imageVector = Icons.Default.Restore,
                         contentDescription = "Restore",
-                        tint = TextSecondaryDark,
-                        modifier = Modifier.size(16.dp)
+                        tint = textSecondary,
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Restore",
                         fontSize = 12.sp,
-                        color = TextSecondaryDark
+                        color = textSecondary
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
-                // Copy
+                // Copy Button
                 IconButton(
                     onClick = onCopy,
                     modifier = Modifier.size(28.dp)
@@ -193,12 +216,12 @@ fun ArchivedNoteCard(
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
                         contentDescription = "Copy",
-                        tint = TextSecondaryDark,
-                        modifier = Modifier.size(16.dp)
+                        tint = textSecondary,
+                        modifier = Modifier.size(15.dp)
                     )
                 }
 
-                // Delete permanently
+                // Delete Button
                 IconButton(
                     onClick = onDelete,
                     modifier = Modifier.size(28.dp)
@@ -206,8 +229,8 @@ fun ArchivedNoteCard(
                     Icon(
                         imageVector = Icons.Default.DeleteOutline,
                         contentDescription = "Delete",
-                        tint = TextDisabledDark,
-                        modifier = Modifier.size(16.dp)
+                        tint = textDisabled,
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }

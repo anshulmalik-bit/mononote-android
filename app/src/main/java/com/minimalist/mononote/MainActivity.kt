@@ -9,6 +9,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.minimalist.mononote.ui.MononoteScreen
@@ -26,7 +30,6 @@ class MainActivity : ComponentActivity() {
     private val requestNotificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                // If the note was marked live, refresh notification
                 val note = viewModel.activeNote.value
                 if (note.isLive) {
                     app.liveCardManager.updateLiveCard(note)
@@ -43,12 +46,19 @@ class MainActivity : ComponentActivity() {
         // Request notification permission for Android 13+ (Required for Live Card)
         checkNotificationPermission()
 
-        // Handle shared text into Mononote
+        // Handle incoming text / voice note intents
         handleIncomingIntent(intent)
 
         setContent {
-            MononoteTheme {
-                MononoteScreen(viewModel = viewModel)
+            // Light Mode by default (exactly like iOS default)
+            var isDarkTheme by remember { mutableStateOf(false) }
+
+            MononoteTheme(darkTheme = isDarkTheme) {
+                MononoteScreen(
+                    viewModel = viewModel,
+                    isDark = isDarkTheme,
+                    onToggleTheme = { isDarkTheme = !isDarkTheme }
+                )
             }
         }
     }
